@@ -129,6 +129,7 @@ namespace PdfViewerHost.Views
 				//FlipPdfViewer.UnRegisterForPrinting();
 			}
 
+			SizeChanged -= LoadPdf_SizeChanged;
 		}
 
 		/// <summary>
@@ -143,6 +144,8 @@ namespace PdfViewerHost.Views
 
 			// cast the passed parameter as a NavigationContext object
 			var parameters = e.Parameter as NavigationContext;
+
+			SizeChanged += LoadPdf_SizeChanged;
 
 			// if we actually have an object passed...
 			if(null != parameters)
@@ -188,6 +191,16 @@ namespace PdfViewerHost.Views
 					//FlipPdfViewer.RegisterForPrinting();
 				}
 			}
+		}
+
+		/// <summary>
+		/// We have to resize the Pdf page currently displayed when we resize.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void LoadPdf_SizeChanged(object sender, SizeChangedEventArgs e)
+		{
+			FlipPdfViewer.ZoomReset();
 		}
 
 		/// <summary>

@@ -250,12 +250,15 @@ namespace FlipPdfViewerControl
         }
 
         public void ZoomReset()
-        {
-            FlipViewItem test = (FlipViewItem)flipView.ContainerFromIndex(flipView.SelectedIndex);
-            var viewer = (ImageViewer)test.ContentTemplateRoot;
+        {	
+			if(_lastPdfImageLoaded > 0)
+			{
+				FlipViewItem test = (FlipViewItem)flipView.ContainerFromIndex(flipView.SelectedIndex);
+				var viewer = (ImageViewer)test.ContentTemplateRoot;
 
-            viewer.ZoomReset();
-        }
+				viewer.ZoomReset();
+			}
+		}
 
         public bool AutoLoad { get; set; }
 
@@ -380,9 +383,19 @@ namespace FlipPdfViewerControl
 
 			try
 			{
-				var pdfDocument = await PdfDocument.LoadFromFileAsync(StorageFileSource, PdfPassword);
+				if (AutoLoad && StorageFileSource != null)
+				{
 
-				await Load(pdfDocument);
+					// OnStorageFileSourceChanged is getting called twice each time through 
+					// the Dependency Property system, so let's
+					// gate Load() from being called again until Load() is finished.
+					// We'll set AutoLoad to true again at the end of the Load() method.
+					AutoLoad = false;
+
+					var pdfDocument = await PdfDocument.LoadFromFileAsync(StorageFileSource, PdfPassword);
+
+					await Load(pdfDocument);
+				}
 			}
 			catch (Exception ex)
 			{
