@@ -41,7 +41,9 @@ namespace PdfViewerHost.Views
         }
 
 		/// <summary>
-		/// The Uri for the Pdf file from Internet URLs or embedded resource PDF files.
+		/// The Uri for the Pdf file from Internet URLs or embedded resource PDF files.  The FlipViewerControl's
+		/// PdfSource dependency property is bound to this in the xaml, so a change here will trigger a change in
+		/// the Pdf file in the control.
 		/// </summary>
         public Uri PdfSource
         {
@@ -124,7 +126,7 @@ namespace PdfViewerHost.Views
 		{
 			if(PrintingIsSupported)
 			{
-				FlipPdfViewer.UnRegisterForPrinting();
+				//FlipPdfViewer.UnRegisterForPrinting();
 			}
 
 		}
@@ -135,7 +137,7 @@ namespace PdfViewerHost.Views
 		/// or an Internet URI.
 		/// </summary>
 		/// <param name="e">NavigationEventArgs, a NavigationContext object.</param>
-		protected async override void OnNavigatedTo(NavigationEventArgs e)
+		protected override void OnNavigatedTo(NavigationEventArgs e)
 		{
 			base.OnNavigatedTo(e);
 
@@ -156,14 +158,13 @@ namespace PdfViewerHost.Views
 					StorageFile pdfFile = parameters.PdfFile;
 
 					// open the Pdf file
-					await OpenStorageFile(pdfFile);
+					OpenStorageFile(pdfFile);
 				}
 				else
 				{
 					// It's not a file but a Uri, so set our Uri property
 					PdfSource = parameters.PdfUri;
 				}
-
 
 				// register for changes in the FlipPdfViewer's PdfStatusMessage DependencyProperty through a DependencyPropertyChangedHelper
 				DependencyPropertyChangedHelper helperStatus = new DependencyPropertyChangedHelper(this.FlipPdfViewer, nameof(this.FlipPdfViewer.PdfStatusMessage));
@@ -177,7 +178,6 @@ namespace PdfViewerHost.Views
 				// hook up the ErrorChanged event handler
 				helperError.PropertyChanged += PdfErrorMessage_PropertyChanged;
 
-
 				PrintingIsSupported = FlipPdfViewer.PrintingIsSupported;
 
 				// if the FliipPdfViewer supports printing, register it with the print system.  We do this here
@@ -185,7 +185,7 @@ namespace PdfViewerHost.Views
 				if (PrintingIsSupported)
 				{
 					// register FlipPdfViewer for printing
-					FlipPdfViewer.RegisterForPrinting();
+					//FlipPdfViewer.RegisterForPrinting();
 				}
 			}
 		}
@@ -229,46 +229,15 @@ namespace PdfViewerHost.Views
 		/// </summary>
 		/// <param name="file">A StorageFile passed in the NavigationEventArgs NavigationContext object.</param>
 		/// <returns>A Task</returns>
-		private async Task OpenStorageFile(StorageFile file)
+		private void OpenStorageFile(StorageFile file)
 		{
-			Stream stream = null;
 
 			if (file != null)
 			{
-				ProgressControl.Visibility = Visibility.Visible;
+				rootPage.NotifyUser("Rendering PDF", MainPage.NotifyType.StatusMessage);
 
-				try
-				{
-					var randomAccessStream = await file.OpenReadAsync();
-					stream = randomAccessStream.AsStreamForRead();
-				}
-				catch (Exception ex)
-				{
-					// File I/O errors are reported as exceptions.
-					rootPage.NotifyUser(ex.Message, MainPage.NotifyType.ErrorMessage);
-				}
-
-				if (stream != null)
-				{
-					// notify the user and set the FlipPdfViewer's StreamSource property
-					ViewPage(stream);
-				}
+				FlipPdfViewer.StorageFileSource = file;
 			}
-		}
-
-		/// <summary>
-		/// Notify the user and set the FlipPdfViewer's StreamSource property so it can render.
-		/// </summary>
-		/// <param name="stream"></param>
-		private void ViewPage(Stream stream)
-		{
-			rootPage.NotifyUser("Rendering PDF", MainPage.NotifyType.StatusMessage);
-
-			ProgressControl.Visibility = Visibility.Visible;
-
-			FlipPdfViewer.StreamSource = stream;
-
-			ProgressControl.Visibility = Visibility.Collapsed;
 		}
 
 		/// <summary>
@@ -286,9 +255,9 @@ namespace PdfViewerHost.Views
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
-        private async void MoveFlipViewForward(object sender, RoutedEventArgs e)
+        private void MoveFlipViewForward(object sender, RoutedEventArgs e)
         {
-            await FlipPdfViewer.IncrementPage();
+            FlipPdfViewer.IncrementPage();
         }
 
 		/// <summary>
@@ -328,7 +297,7 @@ namespace PdfViewerHost.Views
 		/// <param name="e"></param>
         private async void OnPrintButtonClick(object sender, RoutedEventArgs e)
         {
-			await FlipPdfViewer.PrintRequested();
+			//await FlipPdfViewer.PrintRequested();
 		}
 
 	

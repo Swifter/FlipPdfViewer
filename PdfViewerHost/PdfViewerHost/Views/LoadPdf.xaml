@@ -27,7 +27,7 @@
                                                                VerticalAlignment="Top" />
             
             <!-- The CurrentPageNumber displayed in the FlipPdfViewer user control.  -->
-            <TextBlock Text="{x:Bind FlipPdfViewerControl.CurrentPageNumber, Mode=OneWay}"
+            <TextBlock Text="{x:Bind FlipPdfViewer.CurrentPageNumber, Mode=OneWay}"
                                                                FontSize="{x:Bind TextSize, Mode=OneWay}"
                                                                VerticalAlignment="Top"
                                                                Margin="0,0,6,0" />
@@ -37,7 +37,7 @@
                                                                VerticalAlignment="Top" />
             
             <!-- The PageCount of the current PDF document in the FlipPdfViewer user control.  -->
-            <TextBlock Text="{x:Bind FlipPdfViewerControl.PageCount, Mode=OneWay}"  Margin="0,0,6,0"
+            <TextBlock Text="{x:Bind FlipPdfViewer.PageCount, Mode=OneWay}"  Margin="0,0,6,0"
                                                                FontSize="{x:Bind TextSize, Mode=OneWay}"
                                                                VerticalAlignment="Top" />
             <!-- The Print button for the contents of the FlipPdfViewer.  -->
