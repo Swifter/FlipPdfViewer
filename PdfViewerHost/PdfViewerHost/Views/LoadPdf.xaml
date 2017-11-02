@@ -1,0 +1,125 @@
+﻿<local:BasePage
+    x:Class="PdfDemoHost.Views.LoadPdf"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PdfViewerHost.Views"
+    xmlns:pdf="using:FlipPdfViewer"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Page.Resources>
+    
+    <!-- This page is instantiated by the Frame on the MainPage in response to a button click event loading a Pdf file.  -->
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+        <!-- These provide the visual controls for the FlipPdfViewer user control.  The buttons trigger event handlers which
+             pass on the events to that control, and the TextBlocks are fed by DependencyProperties on that control.  -->
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,10">
+            <TextBlock Text="Page"
+                                                               FontSize="{x:Bind TextSize, Mode=OneWay}"
+                                                               Margin="20,0,6,0"
+                                                               VerticalAlignment="Top" />
+            
+            <!-- The CurrentPageNumber displayed in the FlipPdfViewer user control.  -->
+            <TextBlock Text="{x:Bind FlipPdfViewer.CurrentPageNumber, Mode=OneWay}"
+                                                               FontSize="{x:Bind TextSize, Mode=OneWay}"
+                                                               VerticalAlignment="Top"
+                                                               Margin="0,0,6,0" />
+            <TextBlock Text="of"
+                                                               Margin="0,0,6,0"
+                                                               FontSize="{x:Bind TextSize, Mode=OneWay}"
+                                                               VerticalAlignment="Top" />
+            
+            <!-- The PageCount of the current PDF document in the FlipPdfViewer user control.  -->
+            <TextBlock Text="{x:Bind FlipPdfViewer.PageCount, Mode=OneWay}"  Margin="0,0,6,0"
+                                                               FontSize="{x:Bind TextSize, Mode=OneWay}"
+                                                               VerticalAlignment="Top" />
+            <!-- The Print button for the contents of the FlipPdfViewer.  -->
+            <Button Click="OnPrintButtonClick"
+                                            Background="Transparent"
+                                            Style="{StaticResource ToolButtonStyle}"
+                                            HorizontalAlignment="Left"
+                                            Margin="8,0"
+                                            Padding="12,3"
+                                            Visibility="{x:Bind PrintingIsSupported, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                <TextBlock Text="&#xE2F6;"
+                                                    VerticalAlignment="Center"
+                                                    Style="{StaticResource IconStyleLarge}" />
+            </Button>
+            
+            <!-- A Navigation button to move to the previous Pdf page.  The glyph is from the Segoe MLD2 Assets, a 
+                 cheatsheet for which may be found here:  http://modernicons.io/segoe-mdl2/cheatsheet/  -->
+            <Button Click="MoveFlipViewBack"
+
+                                                    Style="{StaticResource FlipViewControlButtonStyle}">
+
+                <TextBlock Text="&#xE973;"
+                                                            VerticalAlignment="Center"
+                                                            Style="{StaticResource IconStyle}" />
+            </Button>
+
+            <!-- A Navigation button to move to the next Pdf page.  -->
+            <Button Click="MoveFlipViewForward"
+
+                                                    Style="{StaticResource FlipViewControlButtonStyle}">
+
+                <TextBlock Text="&#xE974;"
+                                                            VerticalAlignment="Center"
+                                                            Style="{StaticResource IconStyle}" />
+            </Button>
+            
+            <!-- A button to trigger zooming in on the current Pdf page.  -->
+            <Button Click="ZoomIn"
+                                               
+                                                Style="{StaticResource FlipViewControlButtonStyle}">
+
+                <TextBlock Text="&#xE8A3;"
+                                                        VerticalAlignment="Center"
+                                                        Style="{StaticResource IconStyle}" />
+            </Button>
+
+            <!-- A button to trigger zooming out on the current Pdf page. -->
+            <Button Click="ZoomOut"
+                                               
+                                                Style="{StaticResource FlipViewControlButtonStyle}">
+
+                <TextBlock Text="&#xE1A4;"
+                                                        VerticalAlignment="Center"
+                                                        Style="{StaticResource IconStyle}" />
+            </Button>
+
+            <!-- A button to trigger the resize to normal of the current Pdf page.  -->
+            <Button 
+                                                Style="{StaticResource FlipViewControlButtonStyle}"
+                                                Click="DoFitDocumentImageToScreen">
+
+                <TextBlock Text="&#xE1D9;"
+                                                        VerticalAlignment="Center"
+                                                        Style="{StaticResource IconStyle}" />
+            </Button>
+
+        </StackPanel>
+
+        <!-- This grid encloses the FlipPdfViewer control and is a target of the print code. Don't change its name or the
+             printing code will not work.   -->
+        <Grid x:Name="DirectPrintContainer" VerticalAlignment="Bottom" Margin="0,50,0,-50">
+
+            <!-- The actual PDF user control, which uses a FlipView to page through the PDF pages.  -->
+            <pdf:FlipPdfViewerControl x:Name="FlipPdfViewer" 
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            AutoLoad="True"
+                            Source="{x:Bind PdfSource, Mode=OneWay}"
+                            IsZoomEnabled="true"/>
+        </Grid>
+        
+        <!-- This progress ring hasn't been hooked up yet, so don't freak out.  -->
+        <ProgressRing x:Name="ProgressControl" Height="50" Width="50" IsActive="False" Visibility="Collapsed" Margin="0,10,0,0"/>
+        
+    </Grid>
+</local:BasePage>

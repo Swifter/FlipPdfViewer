@@ -1,13 +1,97 @@
 ﻿<Page
-    x:Class="PdfViewerHost.MainPage"
+    x:Class="PdViewerHost.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:PdfViewerHost"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <!-- The structure of this page is taken directly from a Microsoft sample.  -->
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- This SplitView has the main controls for the app for loading PDF files, either from an embedded PDF file,
+             a URI from the Internet, or from a PDF file on the file system.  See MainPage.xaml.cs click event handlers
+             for how each type is handled in your own programs.   -->
+        <SplitView x:Name="Splitter" IsPaneOpen="True" Grid.Column="1" DisplayMode="Inline" Grid.Row="1">
+            <SplitView.Pane>
+                <RelativePanel Margin="10,0,0,0">
 
+                    <StackPanel Orientation="Vertical" Margin="10">
+
+                        <TextBlock x:Name="SampleTitle" Text="Paula's Pdf Viewer" Style="{StaticResource SampleHeaderTextStyle}" TextWrapping="Wrap" Margin="20"/>
+
+                        <!-- The background color choices for the rendered PDF document.  These can be changed to whatever you want. -->
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="PDF Background Color:" Style="{StaticResource BasicTextStyle}" VerticalAlignment="Center" Margin="10,0,0,0" />
+                            <ComboBox x:Name="ColorOptions" SelectedIndex="0" Margin="10">
+                                <ComboBoxItem>White</ComboBoxItem>
+                                <ComboBoxItem>Wheat</ComboBoxItem>
+                                <ComboBoxItem>Corn Silk</ComboBoxItem>
+                                <ComboBoxItem>Ivory</ComboBoxItem>
+                                <ComboBoxItem>Light Gray</ComboBoxItem>
+                                <ComboBoxItem>Floral White</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                        
+                        <!-- The various options for loading PDF files.  The LoadButton PDF option has an optional PasswordBox 
+                             for password-protected PDF files. -->
+                        <Button x:Name="LoadButton" Width="200" VerticalAlignment="Top"  Content="Load Pdf From File" Click="{x:Bind LoadDocument}" Margin="10 "/>
+                        <PasswordBox x:Name="PasswordBox" Width="200" Height="25"  PlaceholderText="Optional password" VerticalAlignment="Top" Margin="10"/>
+                        <Button x:Name="LoadFromAssets" Width="200" Content="Load Embedded Pdf" Click="LoadFromAssets_Click" VerticalAlignment="Top" Margin="10"/>
+                        <Button x:Name="LoadFromUri" Width="200" Content="Load From Uri" Click="LoadFromUri_Click" VerticalAlignment="Top" Margin="10" />
+                    </StackPanel>
+                    
+                    <!-- This footer panel taken directly from a Microsoft sample.   -->
+                    <StackPanel x:Name="FooterPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True">
+
+                        <!-- This just shows how to display the Copyright symbol.  You can do with this whatever you want.  -->
+                        <TextBlock x:Name="Copyright" Text="&#xA9; By Paula. All rights reserved." Style="{StaticResource CopyrightTextStyle}"
+                                   RelativePanel.Above="LinksPanel" Margin="10,10,0,0"
+                                   TextWrapping="Wrap"/>
+
+                    </StackPanel>
+                </RelativePanel>
+            </SplitView.Pane>
+            <RelativePanel>
+                
+                <!-- This Frame contains the FlipPdfViewer control, navigated to by the Button click-event handlers, above.  -->
+                <Frame x:Name="PdfFrame" Margin="0,5,0,0" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True"/>
+
+                <!-- This contains the Status panel, used to display status and error messages from the application.  -->
+                <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
+                    <TextBlock x:Name="StatusLabel" Margin="10,0,0,10" TextWrapping="Wrap" Text="Status:" />
+                    <Border x:Name="StatusBorder" Margin="0,0,0,0">
+                        <ScrollViewer VerticalScrollMode="Auto"  VerticalScrollBarVisibility="Auto" MaxHeight="200">
+                            <TextBlock x:Name="StatusBlock" FontWeight="Bold" 
+                                   MaxWidth="{Binding ElementName=Splitter, Path=ActualWidth}" Margin="10,10,10,20" TextWrapping="Wrap"  />
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+
+            </RelativePanel>
+        </SplitView>
+
+        <!-- This has the Header panel at the top of the document, with the Hamburger button used to toggle visibiilty of 
+             the Frame containing the FlipPdfViewer control.  -->
+        <StackPanel x:Name="HeaderPanel" Orientation="Horizontal">
+            <Border Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}" Grid.Row="0">
+                <ToggleButton Style="{StaticResource SymbolButton}" Click="Button_Click" VerticalAlignment="Top" Foreground="{ThemeResource ApplicationForegroundThemeBrush}">
+                    <ToggleButton.Content>
+                        <FontIcon x:Name="Hamburger" FontFamily="Segoe MDL2 Assets" Glyph="&#xE700;" Margin="0,10,0,0"/>
+                    </ToggleButton.Content>
+                </ToggleButton>
+            </Border>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="Header" Text="Paula's Pdf Viewer" Style="{StaticResource TagLineTextStyle}" Margin="20,15,0,0" />
+                
+                <!-- This displays the name of the PDF file currently in the FlipPdfViewer control.  -->
+                <TextBlock x:Name="SourceHeader" Text="{x:Bind SourceDisplayName, Mode=OneWay}" Style="{StaticResource TagLineTextStyle}" Margin="20,15,0,0" />
+            </StackPanel>
+        </StackPanel>
     </Grid>
+
 </Page>
