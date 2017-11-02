@@ -193,7 +193,7 @@ namespace PdfViewerHost
 				SourceDisplayName = file.Name;
 
 				// navigate to the LoadPdf page
-				PdfFrame.Navigate(typeof(PdfDemoHost.Views.LoadPdf), nav);
+				PdfFrame.Navigate(typeof(Views.LoadPdf), nav);
 			}
 
 			LoadButton.IsEnabled = true;
@@ -219,7 +219,7 @@ namespace PdfViewerHost
 			SourceDisplayName = uri.ToString();
 
 			// navigate to the LoadPdf page
-			PdfFrame.Navigate(typeof(PdfDemoHost.Views.LoadPdf), nav);
+			PdfFrame.Navigate(typeof(Views.LoadPdf), nav);
 		}
 
 		/// <summary>
@@ -242,7 +242,7 @@ namespace PdfViewerHost
 			SourceDisplayName = uri.ToString();
 
 			// navigate to the LoadPdf page
-			PdfFrame.Navigate(typeof(PdfDemoHost.Views.LoadPdf), nav);
+			PdfFrame.Navigate(typeof(Views.LoadPdf), nav);
 
 		}
 	}
