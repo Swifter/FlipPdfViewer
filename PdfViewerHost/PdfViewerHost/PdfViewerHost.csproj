@@ -150,7 +150,12 @@
       <Version>6.0.1</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\FlipPdfViewerControl\FlipPdfViewerControl.csproj">
+      <Project>{297d31ba-2568-4cfe-be4f-699e29810b4b}</Project>
+      <Name>FlipPdfViewerControl</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

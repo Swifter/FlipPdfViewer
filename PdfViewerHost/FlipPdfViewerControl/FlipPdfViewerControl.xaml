@@ -1,0 +1,36 @@
+﻿<UserControl
+    x:Class="FlipPdfViewerControl.FlipPdfViewerControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FlipPdfViewerControl"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400"
+    x:Name="root">
+    
+    <!-- 
+    <ScrollViewer ZoomMode="{x:Bind ZoomMode, Mode=OneWay}" 
+                  Background="{x:Bind Background, Mode=OneWay}">
+        <ItemsControl ItemsSource="{x:Bind PdfPages, Mode=OneWay}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="BitmapImage">
+                    <Image Source="{x:Bind }" Margin="0 2" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
+    -->
+
+    <FlipView Name="flipView"
+                      VerticalAlignment="Center"                      
+                      ItemsSource="{x:Bind PdfPages, Mode=OneWay}">
+        <FlipView.ItemTemplate>
+            <DataTemplate>
+                <local:ImageViewer x:Name="flipImageViewer" Source="{Binding}" />
+            </DataTemplate>
+        </FlipView.ItemTemplate>
+    </FlipView>
+    
+</UserControl>

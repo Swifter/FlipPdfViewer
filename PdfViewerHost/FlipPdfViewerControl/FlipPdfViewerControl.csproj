@@ -106,21 +106,26 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="FlipPdfViewer.xaml.cs">
-      <DependentUpon>FlipPdfViewer.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="imageviewer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="FlipPdfViewerControl.xaml.cs">
+      <DependentUpon>FlipPdfViewerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UriExtension.cs" />
     <EmbeddedResource Include="Properties\FlipPdfViewerControl.rd.xml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MetroLog">
+      <Version>1.0.1</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.0.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="FlipPdfViewer.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="FlipPdfViewerControl.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
