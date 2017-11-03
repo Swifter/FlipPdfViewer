@@ -55,7 +55,8 @@ namespace FlipPdfViewerControl
 
 		/// <summary>
 		/// This represents a StorageFile from opening a Pdf document from the file system.  See LoadPdf.xaml.cs for
-		/// how to generate this StorageFile from a UWP FilePicker.
+		/// how to generate this StorageFile from a UWP FilePicker.  A change in this property will trigger loading a
+		/// new Pdf document from this source.
 		/// </summary>
 		public StorageFile StorageFileSource
 		{
@@ -63,7 +64,7 @@ namespace FlipPdfViewerControl
 			set { SetValue(StorageFileSourceProperty, value); }
 		}
 
-		// Using a DependencyProperty as the backing store for StreamSource.  This enables animation, styling, binding, etc...
+		// Using a DependencyProperty as the backing store for StorageFileSource.  This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty StorageFileSourceProperty =
 			DependencyProperty.Register("StorageFileSource", typeof(StorageFile), typeof(FlipPdfViewerControl),
 				new PropertyMetadata(null, OnStorageFileSourceChanged));
@@ -125,7 +126,6 @@ namespace FlipPdfViewerControl
             new PropertyMetadata(null));
 
 
-
 		public string PdfStatusMessage
 		{
 			get { return (string)GetValue(PdfStatusMessageProperty); }
@@ -157,6 +157,9 @@ namespace FlipPdfViewerControl
 		private static HttpClient _httpClient = new HttpClient();
 
 		private int _lastPdfImageLoaded = 0;
+
+		const int WrongPassword = unchecked((int)0x8007052b); // HRESULT_FROM_WIN32(ERROR_WRONG_PASSWORD)
+		const int GenericFail = unchecked((int)0x80004005);   // E_FAIL
 
 		/// <summary>
 		/// A boolean indicating that the FlipPdfViewer control is running on a system where
@@ -392,7 +395,31 @@ namespace FlipPdfViewerControl
 					// We'll set AutoLoad to true again at the end of the Load() method.
 					AutoLoad = false;
 
-					var pdfDocument = await PdfDocument.LoadFromFileAsync(StorageFileSource, PdfPassword);
+					PdfDocument pdfDocument = null;
+
+					try
+					{
+						pdfDocument = await PdfDocument.LoadFromFileAsync(StorageFileSource, PdfPassword);
+					}
+					catch (Exception ex)
+					{
+						switch (ex.HResult)
+						{
+							case WrongPassword:
+								PdfErrorMessage = "Document is password-protected and password is incorrect.";
+								break;
+
+							case GenericFail:
+								PdfErrorMessage = "Document is not a valid PDF.";
+								break;
+
+							default:
+								// File I/O errors are reported as exceptions.
+								PdfErrorMessage = ex.Message;
+								break;
+						}
+					}
+					
 
 					await Load(pdfDocument);
 				}
@@ -444,7 +471,31 @@ namespace FlipPdfViewerControl
 
 				memStream.Position = 0;
 
-				PdfDocument doc = await PdfDocument.LoadFromStreamAsync(memStream.AsRandomAccessStream(), PdfPassword);
+				PdfDocument doc = null;
+
+				try
+				{
+					doc = await PdfDocument.LoadFromStreamAsync(memStream.AsRandomAccessStream(), PdfPassword);
+				}
+				catch (Exception ex)
+				{
+					switch (ex.HResult)
+					{
+						case WrongPassword:
+							PdfErrorMessage = "Document is password-protected and password is incorrect.";
+							break;
+
+						case GenericFail:
+							PdfErrorMessage = "Document is not a valid PDF.";
+							break;
+
+						default:
+							// File I/O errors are reported as exceptions.
+							PdfErrorMessage = ex.Message;
+							break;
+					}
+				}
+
 
 				log.Trace("In LoadFromLocalAsync(), about to call Load()");
 
@@ -462,7 +513,30 @@ namespace FlipPdfViewerControl
 			{
 				StorageFile f = await StorageFile.GetFileFromApplicationUriAsync(Source);
 
-				PdfDocument doc = await PdfDocument.LoadFromFileAsync(f, PdfPassword);
+				PdfDocument doc = null;
+
+				try
+				{
+					doc = await PdfDocument.LoadFromFileAsync(f, PdfPassword);
+				}
+				catch (Exception ex)
+				{
+					switch (ex.HResult)
+					{
+						case WrongPassword:
+							PdfErrorMessage = "Document is password-protected and password is incorrect.";
+							break;
+
+						case GenericFail:
+							PdfErrorMessage = "Document is not a valid PDF.";
+							break;
+
+						default:
+							// File I/O errors are reported as exceptions.
+							PdfErrorMessage = ex.Message;
+							break;
+					}
+				}
 
 				log.Trace("In LoadFromLocalAsync(), about to call Load()");
 
