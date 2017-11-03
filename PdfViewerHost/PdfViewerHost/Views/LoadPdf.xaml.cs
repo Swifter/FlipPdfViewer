@@ -126,7 +126,7 @@ namespace PdfViewerHost.Views
 		{
 			if(PrintingIsSupported)
 			{
-				//FlipPdfViewer.UnRegisterForPrinting();
+				FlipPdfViewer.UnRegisterForPrinting();
 			}
 
 			SizeChanged -= LoadPdf_SizeChanged;
@@ -188,7 +188,7 @@ namespace PdfViewerHost.Views
 				if (PrintingIsSupported)
 				{
 					// register FlipPdfViewer for printing
-					//FlipPdfViewer.RegisterForPrinting();
+					FlipPdfViewer.RegisterForPrinting();
 				}
 			}
 		}
@@ -310,7 +310,7 @@ namespace PdfViewerHost.Views
 		/// <param name="e"></param>
         private async void OnPrintButtonClick(object sender, RoutedEventArgs e)
         {
-			//await FlipPdfViewer.PrintRequested();
+			await FlipPdfViewer.OnPrintButtonClick();
 		}
 
 	

@@ -3,9 +3,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.Data.Pdf;
+using Windows.Graphics.Printing;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.UI;
@@ -16,8 +16,15 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 
 
+// Since the FlipPdfViewer is still under development, we're using a simple but effective Logger for UWP,
+// MetroLog, which you can find here:  https://github.com/onovotny/MetroLog
+//
+// The logs may be found at c:/Users/yourUserName/AppData/Local/Packages/{GuidForYourApp}/LocalState/MetroLogs.
+// You can find the {GuidForYourApp} by clicking the Package.appxmanifest file in Visual Studio, navigating to 
+// the Packaging tab, and copying the Package Name, which is a Guid. A different log file is generated each day,
+// which changes at midnight UTC.
 using MetroLog;
-
+using FlipPdfViewerControl.PrintCode;
 
 namespace FlipPdfViewerControl
 {
@@ -158,6 +165,8 @@ namespace FlipPdfViewerControl
 
 		private int _lastPdfImageLoaded = 0;
 
+		private FlipViewPagePrintHelper _printHelper;
+
 		const int WrongPassword = unchecked((int)0x8007052b); // HRESULT_FROM_WIN32(ERROR_WRONG_PASSWORD)
 		const int GenericFail = unchecked((int)0x80004005);   // E_FAIL
 
@@ -283,8 +292,59 @@ namespace FlipPdfViewerControl
 			// set the default Pdf background color
 			PdfBackgroundColor = Windows.UI.Colors.Beige;
 
+			if(PrintManager.IsSupported())
+			{
+				PrintingIsSupported = true;
+				_printHelper = new FlipViewPagePrintHelper(this, SetStatusMessage, SetErrorMessage);
+			}
+			else
+			{
+				PrintingIsSupported = false;
+				PdfErrorMessage = "Printing is not supported.";
+			}
+
 			this.InitializeComponent();
         }
+
+		public void RegisterForPrinting()
+		{
+			if (null != _printHelper)
+			{
+				_printHelper.RegisterForPrinting();
+				PdfStatusMessage = "Registered for Printing";
+			}
+			else
+			{
+				PrintingIsSupported = false;
+				PdfErrorMessage = "Printing is not supported.";
+			}
+		}
+
+		public void UnRegisterForPrinting()
+		{
+			if(null != _printHelper)
+			{
+				_printHelper.UnregisterForPrinting();
+				PdfStatusMessage = "Unregistered for Printing";
+			}
+			else
+			{
+				PrintingIsSupported = false;
+				PdfErrorMessage = "Printing is not supported.";
+			}
+		}
+
+		private void SetStatusMessage(string message)
+		{
+			// this will trigger change notifications
+			PdfStatusMessage = message;
+		}
+
+		private void SetErrorMessage(string message)
+		{
+			// this will trigger change notifications
+			PdfErrorMessage = message;
+		}
 
         private void FlipPdfViewerControl_Loaded(object sender, RoutedEventArgs e)
         {
@@ -658,5 +718,26 @@ namespace FlipPdfViewerControl
 			// null is the error return
 			return src;			
 		}
-    }
+
+		/// <summary>
+		/// This is the click handler for the 'Print' button.
+		/// </summary>
+		public async Task OnPrintButtonClick()
+		{
+			await _printHelper.ShowPrintUIAsync();
+		}
+
+		public async Task<int> GetPrintPageCount()
+		{
+			int numberOfPages = 0;
+
+			await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+			() =>
+			{
+				numberOfPages = PageCount;
+			});
+
+			return numberOfPages;
+		}
+	}
 }

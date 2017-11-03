@@ -22,15 +22,17 @@
         </ItemsControl>
     </ScrollViewer>
     -->
-
-    <FlipView Name="flipView"
-                      VerticalAlignment="Center"                      
-                      ItemsSource="{x:Bind PdfPages, Mode=OneWay}">
-        <FlipView.ItemTemplate>
-            <DataTemplate>
-                <local:ImageViewer x:Name="flipImageViewer" Source="{Binding}" />
-            </DataTemplate>
-        </FlipView.ItemTemplate>
-    </FlipView>
+    <Grid>
+        <Canvas x:Name="PrintCanvas" Opacity="0"/>
+        <FlipView Name="flipView"
+                          VerticalAlignment="Center"                      
+                          ItemsSource="{x:Bind PdfPages, Mode=OneWay}">
+            <FlipView.ItemTemplate>
+                <DataTemplate>
+                    <local:ImageViewer x:Name="flipImageViewer" Source="{Binding}" />
+                </DataTemplate>
+            </FlipView.ItemTemplate>
+        </FlipView>
+    </Grid>
     
 </UserControl>

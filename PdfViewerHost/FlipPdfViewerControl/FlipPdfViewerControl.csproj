@@ -107,6 +107,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="imageviewer.cs" />
+    <Compile Include="PrintCode\ContinuationPage.xaml.cs">
+      <DependentUpon>ContinuationPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PrintCode\FlipViewPagePrintHelper.cs" />
+    <Compile Include="PrintCode\PreviewUnavailable.xaml.cs">
+      <DependentUpon>PreviewUnavailable.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PrintCode\PrintHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FlipPdfViewerControl.xaml.cs">
       <DependentUpon>FlipPdfViewerControl.xaml</DependentUpon>
@@ -127,10 +135,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="PrintCode\ContinuationPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PrintCode\PreviewUnavailable.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="PrintCode\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
