@@ -200,7 +200,8 @@ namespace PdfViewerHost
 		}
 
 		/// <summary>
-		/// This loads an embedded PDF file from the Assets directory.
+		/// This loads an embedded PDF file from the Assets directory.  Remember, any PDF file
+		/// you want to load from Assets has to have its Build Action set to Content in Properties.
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>

@@ -59,7 +59,6 @@ namespace FlipPdfViewerControl
             DependencyProperty.Register("Source", typeof(Uri), typeof(FlipPdfViewerControl),
                 new PropertyMetadata(null, OnSourceChanged));
 
-
 		/// <summary>
 		/// This represents a StorageFile from opening a Pdf document from the file system.  See LoadPdf.xaml.cs for
 		/// how to generate this StorageFile from a UWP FilePicker.  A change in this property will trigger loading a
@@ -77,7 +76,9 @@ namespace FlipPdfViewerControl
 				new PropertyMetadata(null, OnStorageFileSourceChanged));
 
 
-
+		/// <summary>
+		/// The optional password of the Pdf Document to be loaded.
+		/// </summary>
 		public string PdfPassword
 		{
 			get { return (string)GetValue(PdfPasswordProperty); }
@@ -89,8 +90,9 @@ namespace FlipPdfViewerControl
 			DependencyProperty.Register("PdfPassword", typeof(string), typeof(FlipPdfViewerControl),
 				new PropertyMetadata(string.Empty));
 
-
-
+		/// <summary>
+		/// The background color with which we will render the Pdf document.
+		/// </summary>
 		public Color PdfBackgroundColor
 		{
 			get { return (Color)GetValue(PdfBackgroundColorProperty); }
@@ -102,6 +104,9 @@ namespace FlipPdfViewerControl
 			DependencyProperty.Register("PdfBackgroundColor", typeof(Color), typeof(FlipPdfViewerControl),
 				new PropertyMetadata(null));
 
+		/// <summary>
+		/// True if Zoom is enabled on the Pdf Document.
+		/// </summary>
 		public bool IsZoomEnabled
         {
             get { return (bool)GetValue(IsZoomEnabledProperty); }
@@ -112,6 +117,9 @@ namespace FlipPdfViewerControl
             DependencyProperty.Register("IsZoomEnabled", typeof(bool), typeof(FlipPdfViewerControl),
                 new PropertyMetadata(true, OnIsZoomEnabledChanged));
 
+		/// <summary>
+		/// The 1-based count of pages in the Pdf Document.
+		/// </summary>
         public int PageCount
         {
             get { return (int)GetValue(PageCountProperty); }
@@ -122,6 +130,9 @@ namespace FlipPdfViewerControl
             DependencyProperty.Register("PageCount", typeof(int), typeof(FlipPdfViewerControl),
             new PropertyMetadata(null));
 
+		/// <summary>
+		/// The 1-based count of the currently displayed page number.
+		/// </summary>
         public int CurrentPageNumber
         {
             get { return (int)GetValue(CurrentPageNumberProperty); }
@@ -132,7 +143,9 @@ namespace FlipPdfViewerControl
             DependencyProperty.Register("CurrentPageNumberCount", typeof(int), typeof(FlipPdfViewerControl),
             new PropertyMetadata(null));
 
-
+		/// <summary>
+		/// Any status message sent by the control.
+		/// </summary>
 		public string PdfStatusMessage
 		{
 			get { return (string)GetValue(PdfStatusMessageProperty); }
@@ -144,6 +157,9 @@ namespace FlipPdfViewerControl
 			DependencyProperty.Register("PdfStatusMessage", typeof(string), typeof(FlipPdfViewerControl),
 				new PropertyMetadata(null));
 
+		/// <summary>
+		/// Any error message sent by the control.
+		/// </summary>
 		public string PdfErrorMessage
 		{
 			get { return (string)GetValue(PdfErrorMessageProperty); }
@@ -155,18 +171,26 @@ namespace FlipPdfViewerControl
 			DependencyProperty.Register("PdfErrorMessage", typeof(string), typeof(FlipPdfViewerControl),
 				new PropertyMetadata(null));
 
-
+		// Set in Load, used throughout
 		private PdfDocument _currentPdfDocument = null;
 
+		// set in the constructor by querying the PrintManager object.  However,
+		// this gets wrongly set to false when loading a Pdf Document from the file system.
+		// Callers should just assume printing is supported on all desktop systems.  See LoadPdf.xaml.cs
 		private bool _printingIsSupported = true;
 
 		// a single static HttpClient instance is used for downloading Pdf documents from URIs
 		private static HttpClient _httpClient = new HttpClient();
 
+		// The count of the last Pdf page loaded in the PdfPages observable collection.
+		// This could be different from PageCount, the total number of pages in the Pdf Document.
+		// Pages are loaded one at a time to avoid FlipView data virtualization issues.
 		private int _lastPdfImageLoaded = 0;
 
+		// the printing object, instantiated in the constructor if printing is supported
 		private FlipViewPagePrintHelper _printHelper;
 
+		// error constants for Pdf document loading failures.
 		const int WrongPassword = unchecked((int)0x8007052b); // HRESULT_FROM_WIN32(ERROR_WRONG_PASSWORD)
 		const int GenericFail = unchecked((int)0x80004005);   // E_FAIL
 
@@ -195,11 +219,15 @@ namespace FlipPdfViewerControl
 			}
 		}
 
+		// an internal property
 		internal ZoomMode ZoomMode
         {
             get { return IsZoomEnabled ? ZoomMode.Enabled : ZoomMode.Disabled; }
         }
 
+		/// <summary>
+		/// Clear PdfPages, set sources to null, clear counters.
+		/// </summary>
         public void ClearPdfImages()
         {
             // clear it out
@@ -210,6 +238,11 @@ namespace FlipPdfViewerControl
 			StorageFileSource = null;
         }
 
+		/// <summary>
+		/// Allows adding of BitmapImage objects to the control without a Pdf Document, so the 
+		/// control can act as an image viewer as well as a Pdf Document viewer.
+		/// </summary>
+		/// <param name="img"></param>
         public void AddPdfImage(BitmapImage img)
         {
             if(null != img)
@@ -219,6 +252,10 @@ namespace FlipPdfViewerControl
             }      
         }
 
+		/// <summary>
+		/// Increments the page shown in the control.  Adds the page to the PdfPages ObservableCollection if
+		/// it has not yet been loaded. This is done to avoid problems with FlipView data virtualization.
+		/// </summary>
         public async void IncrementPage()
         {
             if(flipView.SelectedIndex >= 0 && flipView.SelectedIndex < PageCount - 1)
@@ -231,6 +268,9 @@ namespace FlipPdfViewerControl
             }
         }
 
+		/// <summary>
+		/// Decrements the page shown in the control.
+		/// </summary>
         public void DecrementPage()
         {
             if(flipView.SelectedIndex > 0)
@@ -239,6 +279,9 @@ namespace FlipPdfViewerControl
             }
         }
 
+		/// <summary>
+		/// If Zoom is enabled, zooms into the current page in the control, through its ImageViewer.
+		/// </summary>
         public void ZoomIn()
         {
             if(IsZoomEnabled)
@@ -250,6 +293,9 @@ namespace FlipPdfViewerControl
             }
         }
 
+		/// <summary>
+		/// If Zoom is enabled, zooms out of the current page in the control, through its ImageViewer.
+		/// </summary>
         public void ZoomOut()
         {
             if(IsZoomEnabled)
@@ -261,6 +307,9 @@ namespace FlipPdfViewerControl
             }
         }
 
+		/// <summary>
+		/// Resets the current page in the control to its correct size and aspect ratio, through its ImageViewer.
+		/// </summary>
         public void ZoomReset()
         {	
 			if(_lastPdfImageLoaded > 0)
@@ -272,18 +321,29 @@ namespace FlipPdfViewerControl
 			}
 		}
 
+		/// <summary>
+		/// Always set this to True in the Xaml.  It gates the multiple calls of Source dependency property change events.
+		/// It will be removed in an update as it no longer needs to be public.
+		/// </summary>
         public bool AutoLoad { get; set; }
 
+		// This is where we store the loaded Pdf Document pages after they are loaded. 
+		// Changes to this collection update the UI.
         internal ObservableCollection<BitmapImage> PdfPages
         {
             get;
             set;
         } = new ObservableCollection<BitmapImage>();
 
+		/// <summary>
+		/// Default constructor.
+		/// </summary>
         public FlipPdfViewerControl()
         {
+			// default background color
             this.Background = new SolidColorBrush(Colors.DarkGray);
 
+			// hook the keyboard
             Window.Current.CoreWindow.CharacterReceived += CoreWindow_CharacterReceived;
 
             // Loaded is where we hook up component control event handlers
@@ -292,6 +352,7 @@ namespace FlipPdfViewerControl
 			// set the default Pdf background color
 			PdfBackgroundColor = Windows.UI.Colors.Beige;
 
+			// see if printing is supported by this OS and if so, instantiate the print code.
 			if(PrintManager.IsSupported())
 			{
 				PrintingIsSupported = true;
@@ -306,6 +367,10 @@ namespace FlipPdfViewerControl
 			this.InitializeComponent();
         }
 
+		/// <summary>
+		/// Register the control for printing.  This should be called in the OnNavigatedTo override of
+		/// the page that hosts this control.
+		/// </summary>
 		public void RegisterForPrinting()
 		{
 			if (null != _printHelper)
@@ -320,6 +385,10 @@ namespace FlipPdfViewerControl
 			}
 		}
 
+		/// <summary>
+		/// Un-register the control for printing. This should be called in the OnNavigatedFrom override
+		/// of the page that hosts this control.
+		/// </summary>
 		public void UnRegisterForPrinting()
 		{
 			if(null != _printHelper)
@@ -334,32 +403,53 @@ namespace FlipPdfViewerControl
 			}
 		}
 
+		/// <summary>
+		/// Passed to the printing code so it can update our host page with status messages.
+		/// </summary>
+		/// <param name="message"></param>
 		private void SetStatusMessage(string message)
 		{
 			// this will trigger change notifications
 			PdfStatusMessage = message;
 		}
 
+		/// <summary>
+		/// Passed to the printing code so it can update our host page with error messages.
+		/// </summary>
+		/// <param name="message"></param>
 		private void SetErrorMessage(string message)
 		{
 			// this will trigger change notifications
 			PdfErrorMessage = message;
 		}
 
+		/// <summary>
+		/// This is where we hook up internal event handlers.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
         private void FlipPdfViewerControl_Loaded(object sender, RoutedEventArgs e)
         {
             flipView.SelectionChanged += FlipView_SelectionChanged;
         }
 
-        // increment/decrement the page counter
+        /// <summary>
+		/// Increment/decrement the page counter.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
         private void FlipView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             int i = ((FlipView)sender).SelectedIndex;
             CurrentPageNumber = i + 1;
         }
 
-        // handle keyboard zoom interaction with the flipView
-        private void CoreWindow_CharacterReceived(CoreWindow sender, CharacterReceivedEventArgs args)
+		/// <summary>
+		/// Handle keyboard zoom interaction with the flipView control.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		private void CoreWindow_CharacterReceived(CoreWindow sender, CharacterReceivedEventArgs args)
         {
             if (args.KeyCode == 43 || args.KeyCode == 61) // plus sign / equals sign
             {
@@ -378,26 +468,47 @@ namespace FlipPdfViewerControl
             }
         }
 
+		/// <summary>
+		/// Hooks the instance method for changes in ZoomEnabled property.
+		/// </summary>
+		/// <param name="d"></param>
+		/// <param name="e"></param>
         private static void OnIsZoomEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             ((FlipPdfViewerControl)d).OnIsZoomEnabledChanged();
         }
 
+		/// <summary>
+		/// Hooks the instance method for changes in Pdf Document Source property.
+		/// </summary>
+		/// <param name="d"></param>
+		/// <param name="e"></param>
         private static void OnSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             ((FlipPdfViewerControl)d).OnSourceChanged();
         }
 
+		/// <summary>
+		/// Hooks the instance method for changed in Pdf Document StorageFileSource property.
+		/// </summary>
+		/// <param name="d"></param>
+		/// <param name="e"></param>
 		private static void OnStorageFileSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			((FlipPdfViewerControl)d).OnStorageFileSourceChanged();
 		}
 
+		/// <summary>
+		/// Calls the INotifyPropertyChanged interface for Zoom mode changes.
+		/// </summary>
         private void OnIsZoomEnabledChanged()
         {
             NotifyChanged(nameof(ZoomMode));
         }
 
+		/// <summary>
+		/// Event handler for loading a Pdf Document from a web or file Uri source.
+		/// </summary>
         private async void OnSourceChanged()
         {
             log.Trace("In OnSourceChanged()");
@@ -431,6 +542,9 @@ namespace FlipPdfViewerControl
 			}
         }
 
+		/// <summary>
+		/// Event handler for loading a Pdf Document from a StorageFile source.
+		/// </summary>
 		private async void OnStorageFileSourceChanged()
 		{
 			log.Trace("In OnStorageFileSourceChanged()");
@@ -480,7 +594,7 @@ namespace FlipPdfViewerControl
 						}
 					}
 					
-
+					// loads the first page of the PdfDocument into PdfPages collection.
 					await Load(pdfDocument);
 				}
 			}
@@ -490,6 +604,10 @@ namespace FlipPdfViewerControl
 			}
 		}
 
+		/// <summary>
+		/// Determines the type of Uri in the Source property and calls the appropriate loading method.
+		/// </summary>
+		/// <returns></returns>
         private async Task LoadAsync()
         {
             log.Trace("In LoadAsync()");
@@ -519,10 +637,15 @@ namespace FlipPdfViewerControl
 			}
         }
 
+		/// <summary>
+		/// Loads a remote Pdf Document from a web Uri.
+		/// </summary>
+		/// <returns></returns>
         private async Task LoadFromRemoteAsync()
         {
 			try
 			{
+				// uses the single static HttpClient instance
 				var stream = await _httpClient.GetStreamAsync(Source);
 
 				var memStream = new MemoryStream();
@@ -567,6 +690,10 @@ namespace FlipPdfViewerControl
 			}
         }
 
+		/// <summary>
+		/// Loads a Pdf file from a local filesystem Uri, including embedded resource files from //Assets
+		/// </summary>
+		/// <returns></returns>
         private async Task LoadFromLocalAsync()
         {
 			try
@@ -608,6 +735,12 @@ namespace FlipPdfViewerControl
 			}
         }
 
+		/// <summary>
+		/// Loads the first page of an opened PdfDocument into PdfPages ObservableCollection, sets page numbers
+		/// and counters.
+		/// </summary>
+		/// <param name="pdfDoc"></param>
+		/// <returns></returns>
         private async Task Load(PdfDocument pdfDoc)
         {
 			try
@@ -646,6 +779,11 @@ namespace FlipPdfViewerControl
 			}
         }
 
+		/// <summary>
+		/// Loads a single Pdf page into the PdfPages collection.
+		/// </summary>
+		/// <param name="pageIndex"></param>
+		/// <returns></returns>
 		private async Task LoadPdfPage(uint pageIndex)
 		{
 			try
@@ -661,6 +799,12 @@ namespace FlipPdfViewerControl
 			}
 		}
 
+		/// <summary>
+		/// Loads and returns a single Pdf page from the current document without placing it
+		/// into the PdfPages collection.  Used to generate pages for print.  Called from printer code.
+		/// </summary>
+		/// <param name="pageIndex"></param>
+		/// <returns>BitmapImage of PdfPage</returns>
 		public async Task<BitmapImage> GetPdfImageForPrint(uint pageIndex)
 		{
 			try
@@ -678,6 +822,12 @@ namespace FlipPdfViewerControl
 			return null;
 		}
 
+		/// <summary>
+		/// Decodes a PdfPage from the currentPdfDocument and returns it as a BitmapImage with the 
+		/// currently set PdfBackgroundColor.
+		/// </summary>
+		/// <param name="pageIndex"></param>
+		/// <returns>BitmapImage</returns>
 		private async Task<BitmapImage> GetPageImage(uint pageIndex)
 		{
 			BitmapImage src = null;
@@ -727,6 +877,10 @@ namespace FlipPdfViewerControl
 			await _printHelper.ShowPrintUIAsync();
 		}
 
+		/// <summary>
+		/// Gets the PageCount of the current Pdf Document on the UI thread.  Called from print code.
+		/// </summary>
+		/// <returns>Number of pages in the current PdfDocument</returns>
 		public async Task<int> GetPrintPageCount()
 		{
 			int numberOfPages = 0;
