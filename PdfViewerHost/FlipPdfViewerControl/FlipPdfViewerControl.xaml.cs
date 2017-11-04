@@ -407,20 +407,30 @@ namespace FlipPdfViewerControl
 		/// Passed to the printing code so it can update our host page with status messages.
 		/// </summary>
 		/// <param name="message"></param>
-		private void SetStatusMessage(string message)
+		private async void SetStatusMessage(string message)
 		{
-			// this will trigger change notifications
-			PdfStatusMessage = message;
+			await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+				() =>
+				{
+					// this will trigger change notifications
+					PdfStatusMessage = message;
+				});
+
+
 		}
 
 		/// <summary>
 		/// Passed to the printing code so it can update our host page with error messages.
 		/// </summary>
 		/// <param name="message"></param>
-		private void SetErrorMessage(string message)
+		private async void SetErrorMessage(string message)
 		{
-			// this will trigger change notifications
-			PdfErrorMessage = message;
+			await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+				() =>
+				{
+					// this will trigger change notifications
+					PdfErrorMessage = message;
+				});
 		}
 
 		/// <summary>

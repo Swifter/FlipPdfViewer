@@ -33,10 +33,16 @@ namespace FlipPdfViewerControl.PrintCode
         /// </summary>
         protected PrintDocument printDocument;
 
-        /// <summary>
-        /// Marker interface for document source
-        /// </summary>
-        protected IPrintDocumentSource printDocumentSource;
+		/// <summary>
+		/// The number of images to print.  This is set through the hostControl's PageCount property
+		/// in PrintDetailedOptionsOptionChanged.
+		/// </summary>
+		protected int NumberOfPhotos;
+
+		/// <summary>
+		/// Marker interface for document source
+		/// </summary>
+		protected IPrintDocumentSource printDocumentSource;
 
         /// <summary>
         /// A list of UIElements used to store the print preview pages.  This gives easy access
@@ -136,8 +142,11 @@ namespace FlipPdfViewerControl.PrintCode
 
         public async Task ShowPrintUIAsync()
         {
-            // Catch and print out any errors reported
-            try
+			// get the number of Pdf pages to print
+			NumberOfPhotos = await ((FlipPdfViewerControl)hostControl).GetPrintPageCount();
+
+			// Catch and print out any errors reported
+			try
             {
                 await PrintManager.ShowPrintUIAsync();
             }
@@ -155,7 +164,7 @@ namespace FlipPdfViewerControl.PrintCode
         /// <param name="page">The page to print</param>
         public virtual void PreparePrintContent(Page page)
         {
-            if (firstPage == null)
+			if (firstPage == null)
             {
                 firstPage = page;
                 StackPanel header = (StackPanel)firstPage.FindName("Header");

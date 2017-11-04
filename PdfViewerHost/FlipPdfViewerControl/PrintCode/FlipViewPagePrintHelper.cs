@@ -81,11 +81,7 @@ namespace FlipPdfViewerControl.PrintCode
 
 	class FlipViewPagePrintHelper : PrintHelper
 	{
-		/// <summary>
-		/// The number of images to print.  This is set through the hostControl's PageCount property
-		/// in PrintDetailedOptionsOptionChanged.
-		/// </summary>
-		private int NumberOfPhotos;
+
 
 		/// <summary>
 		/// Constant for 96 DPI
@@ -200,6 +196,10 @@ namespace FlipPdfViewerControl.PrintCode
 						{
 							HostErrorMsgHandler?.Invoke("Failed to print.");
 						}
+						else
+						{
+							HostStatusMsgHandler?.Invoke("Printing complete.");
+						}
 					});
 				};
 
@@ -217,8 +217,7 @@ namespace FlipPdfViewerControl.PrintCode
 		{
 			bool invalidatePreview = false;
 
-			// get the number of Pdf pages to print
-			NumberOfPhotos = await ((FlipPdfViewerControl)hostControl).GetPrintPageCount();
+
 
 			// For this scenario we are interested only when the 2 custom options change (photoSize & scaling) in order to trigger a preview refresh.
 			// Default options that change page aspect will trigger preview invalidation (refresh) automatically.
