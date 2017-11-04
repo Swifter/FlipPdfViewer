@@ -195,6 +195,23 @@ namespace FlipPdfViewerControl
 		const int GenericFail = unchecked((int)0x80004005);   // E_FAIL
 
 		/// <summary>
+		/// An instance of this delegate should be supplied by the host UserControl to pass
+		/// error and other messages back to it.
+		/// </summary>
+		/// <param name="message"></param>
+		public delegate void NotifyHost(string message);
+
+		/// <summary>
+		/// Assign the host control's NotifyHost for Status to this variable
+		/// </summary>
+		public NotifyHost HostStatusMsgHandler;
+
+		/// <summary>
+		/// Assign the host control's NotifyHost for Errors to this variable
+		/// </summary>
+		public NotifyHost HostErrorMsgHandler;
+
+		/// <summary>
 		/// A boolean indicating that the FlipPdfViewer control is running on a system where
 		/// printing is supported. This will be true on all desktop and most mobile systems, 
 		/// including Windows Phone.  However, it gets set to False when loading a PDF from a 
@@ -362,6 +379,7 @@ namespace FlipPdfViewerControl
 			{
 				PrintingIsSupported = false;
 				PdfErrorMessage = "Printing is not supported.";
+				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
 
 			this.InitializeComponent();
@@ -377,11 +395,13 @@ namespace FlipPdfViewerControl
 			{
 				_printHelper.RegisterForPrinting();
 				PdfStatusMessage = "Registered for Printing";
+				HostStatusMsgHandler?.Invoke(PdfStatusMessage);
 			}
 			else
 			{
 				PrintingIsSupported = false;
 				PdfErrorMessage = "Printing is not supported.";
+				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
 		}
 
@@ -395,11 +415,13 @@ namespace FlipPdfViewerControl
 			{
 				_printHelper.UnregisterForPrinting();
 				PdfStatusMessage = "Unregistered for Printing";
+				HostStatusMsgHandler?.Invoke(PdfStatusMessage);
 			}
 			else
 			{
 				PrintingIsSupported = false;
 				PdfErrorMessage = "Printing is not supported.";
+				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
 		}
 
@@ -414,6 +436,7 @@ namespace FlipPdfViewerControl
 				{
 					// this will trigger change notifications
 					PdfStatusMessage = message;
+					HostStatusMsgHandler?.Invoke(PdfErrorMessage);
 				});
 
 
@@ -430,6 +453,7 @@ namespace FlipPdfViewerControl
 				{
 					// this will trigger change notifications
 					PdfErrorMessage = message;
+					HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 				});
 		}
 
@@ -549,6 +573,7 @@ namespace FlipPdfViewerControl
 			catch (Exception ex)
 			{
 				PdfErrorMessage = string.Format("Exception in OnSourceChanged:{0}", ex.Message);
+				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
         }
 
@@ -610,7 +635,8 @@ namespace FlipPdfViewerControl
 			}
 			catch (Exception ex)
 			{
-				PdfErrorMessage = string.Format("Exception in OnStorageFileSourceChanged:{0}{1}Storage File:{2} ", ex.Message, Environment.NewLine, StorageFileSource.Name);
+				///PdfErrorMessage = string.Format("Exception in OnStorageFileSourceChanged:{0}{1}Storage File:{2} ", ex.Message, Environment.NewLine, StorageFileSource.Name);
+				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
 		}
 
@@ -628,11 +654,15 @@ namespace FlipPdfViewerControl
 				{
 					log.Trace("Source.IsFile and not IsWebUri, about to LoadFromLocalAsync.");
 
+					HostStatusMsgHandler?.Invoke("Opening PDF File from Storage");
+
 					await LoadFromLocalAsync();
 				}
 				else if (Source.IsWebUri())
 				{
 					log.Trace("Source.IsWebUri and not IsFile, about to LoadFromRemoteAsync.");
+
+					HostStatusMsgHandler?.Invoke("Opening PDF File from Web");
 
 					await LoadFromRemoteAsync();
 				}
@@ -644,6 +674,7 @@ namespace FlipPdfViewerControl
 			catch (Exception ex)
 			{
 				PdfErrorMessage = string.Format("Exception in LoadAsync():{0}", ex.Message);
+				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
         }
 
@@ -693,10 +724,13 @@ namespace FlipPdfViewerControl
 				log.Trace("In LoadFromLocalAsync(), about to call Load()");
 
 				await Load(doc);
+
+				HostStatusMsgHandler?.Invoke("Web PDF File Loaded");
 			}
 			catch (Exception ex)
 			{
-				PdfErrorMessage = string.Format("Exception in LoadFromRemoteAsync():{0}", ex.Message);
+				//PdfErrorMessage = string.Format("Exception in LoadFromRemoteAsync():{0}", ex.Message);
+				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
         }
 
@@ -738,10 +772,13 @@ namespace FlipPdfViewerControl
 				log.Trace("In LoadFromLocalAsync(), about to call Load()");
 
 				await Load(doc);
+
+				HostStatusMsgHandler?.Invoke("Storage PDF File Loaded");
 			}
 			catch (Exception ex)
 			{
-				PdfErrorMessage = string.Format("Exception in LoadFromLocalAsync():{0}", ex.Message);
+				//PdfErrorMessage = string.Format("Exception in LoadFromLocalAsync():{0}", ex.Message);
+				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
         }
 
@@ -786,6 +823,7 @@ namespace FlipPdfViewerControl
 			catch (Exception ex)
 			{
 				PdfErrorMessage = string.Format("Exception in Load(pdfDocument):{0}", ex.Message);
+				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
         }
 
@@ -802,10 +840,13 @@ namespace FlipPdfViewerControl
 
 				// add the pageImage to the observablecollection and increment counter
 				AddPdfImage(pageImage);
+
+				HostStatusMsgHandler?.Invoke(string.Format("Loaded PDF Page {0}", pageIndex + 1));
 			}
 			catch (Exception ex)
 			{
 				PdfErrorMessage = string.Format("Exception in LoadPdfPage({0}):{1}", pageIndex, ex.Message);
+				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
 		}
 
@@ -826,6 +867,7 @@ namespace FlipPdfViewerControl
 			catch (Exception ex)
 			{
 				PdfErrorMessage = string.Format("Exception in GetPdfImageForPrint({0}):{1}", pageIndex, ex.Message);
+				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
 
 			// null is the error return
@@ -868,6 +910,7 @@ namespace FlipPdfViewerControl
 				else
 				{
 					PdfErrorMessage = string.Format("GetPageImage({0}) pageIndex out of range.", pageIndex);
+					HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 				}
 			}
 			catch (Exception ex)
@@ -884,6 +927,7 @@ namespace FlipPdfViewerControl
 		/// </summary>
 		public async Task OnPrintButtonClick()
 		{
+			HostStatusMsgHandler?.Invoke("Printing document.");
 			await _printHelper.ShowPrintUIAsync();
 		}
 

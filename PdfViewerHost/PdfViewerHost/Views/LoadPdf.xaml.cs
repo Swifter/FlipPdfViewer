@@ -5,6 +5,8 @@ using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Navigation;
 
+using FlipPdfViewerControl;
+
 // For the DependencyPropertyChangedHelper
 using PdfViewerHost.Behaviors;
 
@@ -162,6 +164,7 @@ namespace PdfViewerHost.Views
 
 					// open the Pdf file
 					OpenStorageFile(pdfFile);
+					ForwardStatusMessage("Opening PDF File from Storage");
 				}
 				else
 				{
@@ -182,6 +185,10 @@ namespace PdfViewerHost.Views
 				helperError.PropertyChanged += PdfErrorMessage_PropertyChanged;
 
 				PrintingIsSupported = FlipPdfViewer.PrintingIsSupported;
+
+				// set forward message delegate instances
+				FlipPdfViewer.HostStatusMsgHandler = ForwardStatusMessage;
+				FlipPdfViewer.HostErrorMsgHandler = ForwardErrorMessage;
 
 				// if the FliipPdfViewer supports printing, register it with the print system.  We do this here
 				// so it can be unregisterd in OnNavigatedFrom.
@@ -230,6 +237,38 @@ namespace PdfViewerHost.Views
 			try
 			{
 				rootPage.NotifyUser((string)e.NewValue, MainPage.NotifyType.ErrorMessage);
+			}
+			catch (Exception ex)
+			{
+				rootPage.NotifyUser(ex.Message, MainPage.NotifyType.ErrorMessage);
+			}
+		}
+
+		/// <summary>
+		/// Send the status message to the MainPage
+		/// </summary>
+		/// <param name="message"></param>
+		public void ForwardStatusMessage(string message)
+		{
+			try
+			{
+				rootPage.NotifyUser(message, MainPage.NotifyType.StatusMessage);
+			}
+			catch (Exception ex)
+			{
+				rootPage.NotifyUser(ex.Message, MainPage.NotifyType.ErrorMessage);
+			}
+		}
+
+		/// <summary>
+		/// Send the error message to the MainPage
+		/// </summary>
+		/// <param name="message"></param>
+		public void ForwardErrorMessage(string message)
+		{
+			try
+			{
+				rootPage.NotifyUser(message, MainPage.NotifyType.ErrorMessage);
 			}
 			catch (Exception ex)
 			{
