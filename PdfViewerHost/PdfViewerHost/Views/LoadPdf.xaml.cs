@@ -250,6 +250,11 @@ namespace PdfViewerHost.Views
 		/// <param name="message"></param>
 		public void ForwardStatusMessage(string message)
 		{
+			if(null == message)
+			{
+				message = "Action cancelled.";
+			}
+
 			try
 			{
 				rootPage.NotifyUser(message, MainPage.NotifyType.StatusMessage);
@@ -266,6 +271,11 @@ namespace PdfViewerHost.Views
 		/// <param name="message"></param>
 		public void ForwardErrorMessage(string message)
 		{
+			if (null == message)
+			{
+				message = "Action cancelled";
+			}
+
 			try
 			{
 				rootPage.NotifyUser(message, MainPage.NotifyType.ErrorMessage);
@@ -273,7 +283,7 @@ namespace PdfViewerHost.Views
 			catch (Exception ex)
 			{
 				rootPage.NotifyUser(ex.Message, MainPage.NotifyType.ErrorMessage);
-			}
+			}			
 		}
 
 		/// <summary>
