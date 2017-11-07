@@ -105,7 +105,7 @@ namespace FlipPdfViewerControl
 				new PropertyMetadata(null));
 
 		/// <summary>
-		/// True if Zoom is enabled on the Pdf Document.
+		/// Set True if Zoom is enabled on the Pdf Document.
 		/// </summary>
 		public bool IsZoomEnabled
         {
@@ -339,10 +339,9 @@ namespace FlipPdfViewerControl
 		}
 
 		/// <summary>
-		/// Always set this to True in the Xaml.  It gates the multiple calls of Source dependency property change events.
-		/// It will be removed in an update as it no longer needs to be public.
+		/// This gates the multiple calls of Source dependency property change events.
 		/// </summary>
-        public bool AutoLoad { get; set; }
+		private bool _autoLoad = true;
 
 		// This is where we store the loaded Pdf Document pages after they are loaded. 
 		// Changes to this collection update the UI.
@@ -558,15 +557,15 @@ namespace FlipPdfViewerControl
 
 			try
 			{
-				if (AutoLoad && Source != null)
+				if (_autoLoad && Source != null)
 				{
 					// OnSourceChanged is getting called twice each time through 
 					// the Dependency Property system, so let's
 					// gate LoadAsync() from being called again until Load() is finished.
-					// We'll set AutoLoad to true again at the end of the Load() method.
-					AutoLoad = false;
+					// We'll set _autoLoad to true again at the end of the Load() method.
+					_autoLoad = false;
 
-					log.Trace("AutoLoad is true, about to LoadAsync()");
+					log.Trace("_autoLoad is true, about to LoadAsync()");
 					await LoadAsync();
 				}
 			}
@@ -595,14 +594,14 @@ namespace FlipPdfViewerControl
 
 			try
 			{
-				if (AutoLoad && StorageFileSource != null)
+				if (_autoLoad && StorageFileSource != null)
 				{
 
 					// OnStorageFileSourceChanged is getting called twice each time through 
 					// the Dependency Property system, so let's
 					// gate Load() from being called again until Load() is finished.
-					// We'll set AutoLoad to true again at the end of the Load() method.
-					AutoLoad = false;
+					// We'll set _autoLoad to true again at the end of the Load() method.
+					_autoLoad = false;
 
 					PdfDocument pdfDocument = null;
 
@@ -812,13 +811,13 @@ namespace FlipPdfViewerControl
 					PdfErrorMessage = string.Format("Load(pdfDocument) passed null pdfDocument argument.");
 				}
 
-				log.Trace("Leaving Load(), about to set AutoLoad to true");
+				log.Trace("Leaving Load(), about to set_autoLoad to true");
 
-				// we've finished loading a document, so set AutoLoad to true to 
+				// we've finished loading a document, so set _autoLoad to true to 
 				// enable another load, because the UWP framework calls OnSourceChanged twice
 				// through the DependencyProperty system and it will double load the document
 				// if you don't do this.
-				AutoLoad = true;
+				_autoLoad = true;
 			}
 			catch (Exception ex)
 			{

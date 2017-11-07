@@ -7,9 +7,6 @@ using Windows.UI.Xaml.Navigation;
 
 using FlipPdfViewerControl;
 
-// For the DependencyPropertyChangedHelper
-using PdfViewerHost.Behaviors;
-
 // Since the FlipPdfViewer is still under development, we're using a simple but effective Logger for UWP,
 // MetroLog, which you can find here:  https://github.com/onovotny/MetroLog
 //
@@ -149,7 +146,7 @@ namespace PdfViewerHost.Views
 
 			SizeChanged += LoadPdf_SizeChanged;
 
-			// if we actually have an object passed...
+			// if we actually have a NavigationContext object passed...
 			if(null != parameters)
 			{
 				// set the FlipPdfViewer's background color before rendering
@@ -162,27 +159,19 @@ namespace PdfViewerHost.Views
 				{
 					StorageFile pdfFile = parameters.PdfFile;
 
-					// open the Pdf file
-					OpenStorageFile(pdfFile);
+					// Open the Pdf file through the FlipPdfViewer's StorageFileSource
+					// property directly.  This will trigger loading the PDF file.
+					FlipPdfViewer.StorageFileSource = pdfFile;
+
 					ForwardStatusMessage("Opening PDF File from Storage");
 				}
 				else
 				{
-					// It's not a file but a Uri, so set our Uri property
+					// It's not a file but a Uri, so set our Uri property,
+					// bound to the FlipPdfViewer in XAML, which will trigger
+					// loading the PDF file.
 					PdfSource = parameters.PdfUri;
 				}
-
-				// register for changes in the FlipPdfViewer's PdfStatusMessage DependencyProperty through a DependencyPropertyChangedHelper
-				DependencyPropertyChangedHelper helperStatus = new DependencyPropertyChangedHelper(this.FlipPdfViewer, nameof(this.FlipPdfViewer.PdfStatusMessage));
-
-				// hook up the StatusChanged event handler
-				helperStatus.PropertyChanged += PdfStatusMessage_PropertyChanged;
-
-				// register for changes in the FlipPdfViewer's PdfErrorMessage DependencyProperty
-				DependencyPropertyChangedHelper helperError = new DependencyPropertyChangedHelper(this.FlipPdfViewer, nameof(this.FlipPdfViewer.PdfErrorMessage));
-
-				// hook up the ErrorChanged event handler
-				helperError.PropertyChanged += PdfErrorMessage_PropertyChanged;
 
 				PrintingIsSupported = FlipPdfViewer.PrintingIsSupported;
 
@@ -190,7 +179,7 @@ namespace PdfViewerHost.Views
 				FlipPdfViewer.HostStatusMsgHandler = ForwardStatusMessage;
 				FlipPdfViewer.HostErrorMsgHandler = ForwardErrorMessage;
 
-				// if the FliipPdfViewer supports printing, register it with the print system.  We do this here
+				// if the FlipPdfViewer supports printing, register it with the print system.  We do this here
 				// so it can be unregisterd in OnNavigatedFrom.
 				if (PrintingIsSupported)
 				{
@@ -208,40 +197,6 @@ namespace PdfViewerHost.Views
 		private void LoadPdf_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
 			FlipPdfViewer.ZoomReset();
-		}
-
-		/// <summary>
-		/// Report the FlipPdfViewer's PdfStatusMessage changes to the Mainpage's Status area
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void PdfStatusMessage_PropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
-		{
-			try
-			{
-				rootPage.NotifyUser((string)e.NewValue, MainPage.NotifyType.StatusMessage);
-			}
-			catch (Exception ex)
-			{
-				rootPage.NotifyUser(ex.Message, MainPage.NotifyType.ErrorMessage);
-			}		
-		}
-
-		/// <summary>
-		/// Report the FlipPdfViewer's PdfErrorMessage changes to the Mainpage's Status area
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void PdfErrorMessage_PropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
-		{
-			try
-			{
-				rootPage.NotifyUser((string)e.NewValue, MainPage.NotifyType.ErrorMessage);
-			}
-			catch (Exception ex)
-			{
-				rootPage.NotifyUser(ex.Message, MainPage.NotifyType.ErrorMessage);
-			}
 		}
 
 		/// <summary>
@@ -284,22 +239,6 @@ namespace PdfViewerHost.Views
 			{
 				rootPage.NotifyUser(ex.Message, MainPage.NotifyType.ErrorMessage);
 			}			
-		}
-
-		/// <summary>
-		/// Open a StorageFile as a RandomAccessStream.
-		/// </summary>
-		/// <param name="file">A StorageFile passed in the NavigationEventArgs NavigationContext object.</param>
-		/// <returns>A Task</returns>
-		private void OpenStorageFile(StorageFile file)
-		{
-
-			if (file != null)
-			{
-				rootPage.NotifyUser("Rendering PDF", MainPage.NotifyType.StatusMessage);
-
-				FlipPdfViewer.StorageFileSource = file;
-			}
 		}
 
 		/// <summary>

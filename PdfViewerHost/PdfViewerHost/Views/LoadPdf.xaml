@@ -107,15 +107,13 @@
 
         </StackPanel>
 
-        <!-- This grid encloses the FlipPdfViewer control and is a target of the print code. Don't change its name or the
-             printing code will not work.   -->
-        <Grid x:Name="DirectPrintContainer" VerticalAlignment="Bottom" Margin="0,50,0,-50">
+        <!-- This grid encloses the FlipPdfViewerControl and positions it.  -->
+        <Grid x:Name="FlipPdfViewContainer" VerticalAlignment="Bottom" Margin="0,50,0,-50">
 
             <!-- The actual PDF user control, which uses a FlipView to page through the PDF pages.  -->
             <pdf:FlipPdfViewerControl x:Name="FlipPdfViewer" 
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
-                            AutoLoad="True"
                             Source="{x:Bind PdfSource, Mode=OneWay}"
                             IsZoomEnabled="true"/>
         </Grid>

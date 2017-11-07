@@ -168,7 +168,9 @@ namespace PdfViewerHost
         }
 
 		/// <summary>
-		/// Launch the FileOpenPicker and get the name of a PDF document to load.
+		/// Launch the FileOpenPicker and get the name of a PDF document to load. This is
+		/// an async method because it awaits an async method, but it doesn't return a
+		/// Task so it can match the click handler signature.
 		/// </summary>
 		private async void LoadDocument()
 		{
