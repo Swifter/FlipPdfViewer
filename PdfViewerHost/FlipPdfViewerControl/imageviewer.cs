@@ -8,8 +8,6 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 
-using MetroLog;
-
 namespace FlipPdfViewerControl
 {
 
@@ -31,8 +29,6 @@ namespace FlipPdfViewerControl
         private static int pixelHeight;
 
         private static float zoomChangeFactor = 0.2f;
-
-        private static ILogger log = LogManagerFactory.DefaultLogManager.GetLogger<ImageViewer>();
 
         private static void SourceChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
@@ -60,13 +56,9 @@ namespace FlipPdfViewerControl
                 var ratioWidth = control.scroll.ViewportWidth / pixelWidth;
                 var ratioHeight = control.scroll.ViewportHeight / pixelHeight;
 
-                //log.Trace(string.Format("Inside ImageViewer.SourceChangedCallback:img.Loaded. ratioWidth = {0}  ratioHeight = {1}", ratioWidth, ratioHeight));
-
                 var zoomFactor = (ratioWidth >= 1 && ratioHeight >= 1)
                     ? 1F
                     : (float)(Math.Min(ratioWidth, ratioHeight));
-
-                //log.Trace(string.Format("Inside ImageViewer.SourceChangedCallback:img.Loaded. zoomFactor = {0}", zoomFactor));
 
                 control.imgActualWidth = img.ActualWidth;
                 control.imgActualHeight = img.ActualHeight;

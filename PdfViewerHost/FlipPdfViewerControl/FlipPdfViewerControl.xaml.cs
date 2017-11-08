@@ -632,9 +632,8 @@ namespace FlipPdfViewerControl
 					await Load(pdfDocument);
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
-				///PdfErrorMessage = string.Format("Exception in OnStorageFileSourceChanged:{0}{1}Storage File:{2} ", ex.Message, Environment.NewLine, StorageFileSource.Name);
 				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
 		}
@@ -670,7 +669,7 @@ namespace FlipPdfViewerControl
 					throw new ArgumentException($"Source '{Source.ToString()}' could not be recognized!");
 				}
 			} 
-			catch (Exception ex)
+			catch (Exception)
 			{
 				PdfErrorMessage = string.Format("Exception in LoadAsync():{0}", ex.Message);
 				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
@@ -726,9 +725,8 @@ namespace FlipPdfViewerControl
 
 				HostStatusMsgHandler?.Invoke("Web PDF File Loaded");
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
-				//PdfErrorMessage = string.Format("Exception in LoadFromRemoteAsync():{0}", ex.Message);
 				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
         }
@@ -774,9 +772,8 @@ namespace FlipPdfViewerControl
 
 				HostStatusMsgHandler?.Invoke("Storage PDF File Loaded");
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
-				//PdfErrorMessage = string.Format("Exception in LoadFromLocalAsync():{0}", ex.Message);
 				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
 			}
         }
