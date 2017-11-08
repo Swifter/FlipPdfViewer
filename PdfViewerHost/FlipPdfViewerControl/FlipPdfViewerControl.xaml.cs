@@ -669,7 +669,7 @@ namespace FlipPdfViewerControl
 					throw new ArgumentException($"Source '{Source.ToString()}' could not be recognized!");
 				}
 			} 
-			catch (Exception)
+			catch (Exception ex)
 			{
 				PdfErrorMessage = string.Format("Exception in LoadAsync():{0}", ex.Message);
 				HostErrorMsgHandler?.Invoke(PdfErrorMessage);
